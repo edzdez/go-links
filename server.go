@@ -6,12 +6,21 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
-func ShortcutHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("GET %s", r.URL.Path)
+func withLogging(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
+}
 
-	_, err := io.WriteString(w, r.URL.Path)
+func ShortcutHandler(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	remaining, _ := strings.CutPrefix(r.URL.Path, fmt.Sprintf("/%s", name))
+
+	_, err := io.WriteString(w, fmt.Sprintf("shortcut: %s, remaining: %s", name, remaining))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -22,8 +31,15 @@ func main() {
 	// db := flag.String("db", "", "database to connect to.")
 	flag.Parse()
 
-	http.HandleFunc("GET /{name}/", ShortcutHandler)
+	router := http.NewServeMux()
+
+	router.HandleFunc("GET /{name}/", ShortcutHandler)
+
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", *port),
+		Handler: withLogging(router),
+	}
 
 	log.Printf("Listening on port %d", *port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
+	log.Fatal(server.ListenAndServe())
 }
