@@ -9,6 +9,7 @@ go_library(
     srcs = [
         "get_index.go",
         "get_shortcut.go",
+        "post_shortcut.go",
     ],
     importpath = "go-links/handlers",
     deps = [

@@ -70,6 +70,7 @@ func main() {
 
 	router.HandleFunc("GET /", handlers.IndexHandler)
 	router.HandleFunc("GET /{name}/", handlers.ShortcutHandler)
+	router.HandleFunc("POST /{name}", handlers.RegisterShortcutHandler)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", *port),
