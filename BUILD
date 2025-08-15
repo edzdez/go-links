@@ -1,11 +1,12 @@
 load("@rules_go//go:def.bzl", "go_binary")
 
 go_binary(
-    name = "go_links_server",
+    name = "server",
     srcs = [
         "server.go"
     ],
     cgo = True,
+    data = glob(["templates/**", "static/**"]),
     deps = [
         "//middleware",
         "//handlers",

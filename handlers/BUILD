@@ -7,7 +7,11 @@ package(
 go_library(
     name = "handlers",
     srcs = [
+        "get_index.go",
         "get_shortcut.go",
     ],
     importpath = "go-links/handlers",
+    deps = [
+        "//models"
+    ]
 )

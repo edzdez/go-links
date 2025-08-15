@@ -68,11 +68,12 @@ func main() {
 
 	router := http.NewServeMux()
 
+	router.HandleFunc("GET /", handlers.IndexHandler)
 	router.HandleFunc("GET /{name}/", handlers.ShortcutHandler)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", *port),
-		Handler: middleware.WithLogging(middleware.WithDb(db, router)),
+		Handler: middleware.WithLogging(middleware.WithStatic(middleware.WithDb(db, router))),
 	}
 
 	log.Printf("Listening on port %d", *port)

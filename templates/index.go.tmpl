@@ -1,0 +1,32 @@
+{{define "shortcuts"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shortcuts</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="/static/htmx.min.js"></script>
+</head>
+<body>
+<h1>All Shortcuts:</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>URL</th>
+        </tr>
+    </thead>
+    <tbody>
+    {{range .}}
+        <tr>
+            <td>{{.Name}}</td>
+            <td><a href="{{.Url}}" target="_blank">{{.Url}}</a></td>
+        </tr>
+    </tbody>
+    {{else}}
+    <tr><td colspan="2">No shortcuts found.</td></tr>
+    {{end}}
+</table>
+</body>
+</html>
+{{end}}
