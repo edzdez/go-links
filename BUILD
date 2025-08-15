@@ -7,6 +7,8 @@ go_binary(
     ],
     cgo = True,
     deps = [
+        "//middleware",
+        "//handlers",
         "@com_github_adrg_xdg//:xdg",
         "@com_github_mattn_go_sqlite3//:go-sqlite3"
     ],
