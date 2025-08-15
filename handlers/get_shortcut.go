@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"go-links/models"
 	"html/template"
 	"log"
 	"net/http"
@@ -20,7 +21,7 @@ func ShortcutHandler(w http.ResponseWriter, r *http.Request) {
 	var url string
 	err := row.Scan(&url)
 	if errors.Is(err, sql.ErrNoRows) {
-		log.Printf("shortcut %s not found", name)
+		log.Printf("Shortcut %s not found", name)
 
 		t, err := template.New("register").ParseFiles("templates/register.go.tmpl")
 		if err != nil {
@@ -29,7 +30,8 @@ func ShortcutHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := t.ExecuteTemplate(w, "name", name); err != nil {
+		shortcut := models.Shortcut{Name: name, Url: ""}
+		if err := t.ExecuteTemplate(w, "shortcut", shortcut); err != nil {
 			log.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
@@ -37,7 +39,7 @@ func ShortcutHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		http.Error(w, "Internal Server Error", 500)
 	} else {
-		log.Printf("shortcut %s links to %s", name, url)
+		log.Printf("Shortcut %s links to %s", name, url)
 		http.Redirect(w, r, fmt.Sprintf("%s%s", url, remaining), http.StatusFound)
 	}
 }

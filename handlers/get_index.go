@@ -2,13 +2,16 @@ package handlers
 
 import (
 	"database/sql"
+	"errors"
 	"go-links/models"
 	"html/template"
 	"log"
 	"net/http"
 )
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
+func displayIndex(db *sql.DB, w http.ResponseWriter) {
+	log.Println("Serving list page.")
+
 	t, err := template.New("index").ParseFiles("templates/index.go.tmpl")
 	if err != nil {
 		log.Println(err)
@@ -16,9 +19,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db := r.Context().Value("db").(*sql.DB)
-
-	rows, err := db.Query("SELECT * FROM shortcuts")
+	rows, err := db.Query("SELECT * FROM shortcuts ORDER BY name")
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -44,5 +45,41 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	if err := t.ExecuteTemplate(w, "shortcuts", shortcuts); err != nil {
 		log.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func displayEdit(db *sql.DB, toEdit string, w http.ResponseWriter) {
+	log.Println("Serving edit page")
+
+	t, err := template.ParseFiles("templates/register.go.tmpl")
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	row := db.QueryRow("SELECT url FROM shortcuts WHERE name = $1", toEdit)
+
+	shortcut := models.Shortcut{Name: toEdit}
+	err = row.Scan(&shortcut.Url)
+	if errors.Is(err, sql.ErrNoRows) {
+		log.Println("Shortcut does not exist")
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+
+	if err := t.ExecuteTemplate(w, "shortcut", shortcut); err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	db := r.Context().Value("db").(*sql.DB)
+
+	if toEdit := r.URL.Query().Get("edit"); toEdit != "" {
+		displayEdit(db, toEdit, w)
+	} else {
+		displayIndex(db, w)
 	}
 }
