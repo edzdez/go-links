@@ -64,10 +64,13 @@ func displayEdit(db *sql.DB, toEdit string, w http.ResponseWriter) {
 	err = row.Scan(&shortcut.Url)
 	if errors.Is(err, sql.ErrNoRows) {
 		log.Println("Shortcut does not exist")
-		http.Error(w, "Not Found", http.StatusNotFound)
+	} else if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
+	log.Println("Serving form")
 	if err := t.ExecuteTemplate(w, "shortcut", shortcut); err != nil {
 		log.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
