@@ -39,7 +39,7 @@ func openDb(dbPath string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS shortcuts (name TEXT, url TEXT)")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS shortcuts (name TEXT PRIMARY KEY, url TEXT)")
 	if err != nil {
 		return nil, err
 	}
